@@ -29,6 +29,7 @@
     --accent-rnc: #b91c1c;
     --accent-placa: #b8860b;
     --accent-hist: #2563eb;
+    --accent-proto: #e67e22;
     --ok: #15803d;
     --err: #c4424c;
     --add: #2ea76b;
@@ -111,6 +112,7 @@
   .tab-btn.active[data-tab="rnc"]  .indicator { background: var(--accent-rnc); }
   .tab-btn.active[data-tab="placa"] .indicator { background: var(--accent-placa); }
   .tab-btn.active[data-tab="hist"] .indicator { background: var(--accent-hist); }
+  .tab-btn.active[data-tab="proto"] .indicator { background: var(--accent-proto); }
   .tab-btn .count-badge {
     display: inline-block;
     background: var(--ink-soft);
@@ -353,6 +355,7 @@
   .hist-tag.pc { background: var(--accent-pc); }
   .hist-tag.rnc { background: var(--accent-rnc); }
   .hist-tag.placa { background: var(--accent-placa); }
+  .hist-tag.proto { background: var(--accent-proto); }
   .hist-title-block { flex: 1; min-width: 0; }
   .hist-title {
     font-weight: 600;
@@ -694,6 +697,9 @@
   <button class="tab-btn" data-tab="placa" role="tab" aria-selected="false">
     Placas Palete<span class="indicator"></span>
   </button>
+  <button class="tab-btn" data-tab="proto" role="tab" aria-selected="false">
+    Protocolo<span class="indicator"></span>
+  </button>
   <button class="tab-btn" data-tab="hist" role="tab" aria-selected="false">
     Histórico <span class="count-badge" id="hist-count">0</span><span class="indicator"></span>
   </button>
@@ -885,12 +891,66 @@
 <!-- ============================================ -->
 <!-- ABA 3: HISTÓRICO                              -->
 <!-- ============================================ -->
+
+<!-- ============================================ -->
+<!-- ABA: PROTOCOLO DE RETIRADA                    -->
+<!-- ============================================ -->
+<section class="tab-panel" id="panel-proto" role="tabpanel">
+  <div class="card" style="margin-bottom:14px;">
+    <div class="section-title">Dados do Protocolo</div>
+    <div class="section-body proto-grid">
+      <div class="field"><label>Nº Protocolo</label><input type="text" id="proto-num" placeholder="Ex: 001"></div>
+      <div class="field"><label>Tipo</label><div class="proto-tipo-toggle"><button class="proto-tipo-btn active" onclick="proto.setTipo(0,this)">0 — Requisição</button><button class="proto-tipo-btn" onclick="proto.setTipo(1,this)">1 — Retorno</button></div></div>
+      <div class="field"><label>Destino</label><input type="text" id="proto-destino" placeholder="Ex: ANEXO"></div>
+      <div class="field"><label>Data</label><input type="date" id="proto-data"></div>
+      <div class="field"><label>Solicitante</label><input type="text" id="proto-solicitante" placeholder="Nome do solicitante"></div>
+      <div class="field"><label>Responsável</label><input type="text" id="proto-responsavel" placeholder="Responsável pela requisição"></div>
+      <div class="field"><label>Motorista</label><input type="text" id="proto-motorista" placeholder="Nome do motorista"></div>
+      <div class="field"><label>Veículo / Placa</label><input type="text" id="proto-veiculo" placeholder="Ex: CARRINHO ELÉTRICO"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="section-title">Produtos</div>
+    <div class="section-body full">
+      <table class="proto-prod-table">
+        <thead><tr><th style="width:35%">Produto</th><th style="width:10%">Unid.</th><th style="width:12%">Solicitado</th><th style="width:12%">Indo</th><th style="width:14%">Cód.</th><th style="width:17%"></th></tr></thead>
+        <tbody id="proto-prod-body">
+          <tr>
+            <td><input type="text" placeholder="Descrição"></td>
+            <td><select><option>UN</option><option>KG</option><option>CX</option><option>PCT</option><option>LT</option><option>MT</option></select></td>
+            <td><input type="number" placeholder="Qtd" min="0"></td>
+            <td><input type="number" placeholder="Qtd" min="0"></td>
+            <td><input type="text" placeholder="Código"></td>
+            <td style="text-align:center"><span class="proto-btn-icon del" onclick="proto.delRow(this)">🗑</span> <span class="proto-btn-icon add" onclick="proto.addRow()">＋</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="section-title">Imagens (Evidências)</div>
+    <div class="section-body full">
+      <div class="proto-upload"><input type="file" accept="image/*" multiple onchange="proto.handleImgs(event)"><div style="font-size:24px;color:var(--line);">📷</div><p>Clique ou arraste imagens aqui</p></div>
+      <div class="proto-imgs" id="proto-imgs"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="proto-actions">
+      <button class="proto-btn proto-btn-secondary" onclick="proto.clear()">🔄 Limpar</button>
+      <button class="proto-btn proto-btn-primary" onclick="proto.gerarPDF()">📄 Gerar PDF</button>
+    </div>
+  </div>
+</section>
+
+<div id="proto-pdf-content"></div>
+
 <section class="tab-panel" id="panel-hist" role="tabpanel">
   <div class="hist-filter">
     <button class="active" data-filter="all">Todos</button>
     <button data-filter="pc">Parâmetros</button>
     <button data-filter="rnc">RNC</button>
     <button data-filter="placa">Placas</button>
+    <button data-filter="proto">Protocolo</button>
   </div>
   <div id="hist-list"></div>
 </section>
