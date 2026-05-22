@@ -654,6 +654,37 @@
     overflow: hidden;
   }
 
+  /* ===== Protocolo Retirada ===== */
+  #placa-form input[type="text"] { text-transform: uppercase; }
+  #placa-form input[type="text"]::placeholder { text-transform: none; }
+  .proto-tipo-toggle { display: flex; border-radius: 10px; overflow: hidden; background: var(--bg); border: 1px solid var(--line); }
+  .proto-tipo-btn { flex: 1; padding: 12px 16px; border: none; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--ink-soft); transition: all 0.2s; font-family: inherit; border-radius: 10px; }
+  .proto-tipo-btn.active { background: var(--accent-rnc); color: #fff; box-shadow: 0 1px 4px rgba(185,28,28,0.25); }
+  .proto-prod-table { width: 100%; border-collapse: collapse; }
+  .proto-prod-table th { background: var(--bg); padding: 10px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--ink-soft); text-align: left; border-bottom: 2px solid var(--line); }
+  .proto-prod-table td { padding: 8px 4px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+  .proto-prod-actions { display: flex; gap: 6px; justify-content: center; }
+  .proto-imgs-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .proto-thumb { position: relative; width: 110px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .proto-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .proto-thumb .rm { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; background: rgba(196,66,76,0.85); color: #fff; border: none; border-radius: 50%; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #proto-pdf-content { position: absolute; left: -9999px; width: 794px; background: #fff; font-family: Arial, Helvetica, sans-serif; }
+  #proto-pdf-content .ppg { width: 794px; min-height: 1123px; padding: 30px 40px; }
+  #proto-pdf-content .phdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  #proto-pdf-content .phdr-l table { border-collapse: collapse; }
+  #proto-pdf-content .phdr-l td { border: 1.5px solid #000; padding: 5px 10px; font-size: 12px; }
+  #proto-pdf-content .phdr-l .fl { font-weight: 700; font-size: 11px; min-width: 110px; }
+  #proto-pdf-content .phdr-l .fv { min-width: 160px; }
+  #proto-pdf-content .phdr-r { text-align: center; border: 1.5px solid #000; padding: 10px 15px; min-width: 300px; }
+  #proto-pdf-content .phdr-r img { height: 50px; margin-bottom: 6px; }
+  #proto-pdf-content .ptbl { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  #proto-pdf-content .ptbl th { background: #f0f0f0; border: 1.5px solid #000; padding: 6px 8px; font-size: 10px; text-transform: uppercase; font-weight: 700; }
+  #proto-pdf-content .ptbl td { border: 1.5px solid #000; padding: 5px 8px; font-size: 11px; }
+  #proto-pdf-content .pimgs { border: 2px solid #0056b3; margin-top: 16px; padding: 12px; min-height: 180px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+  #proto-pdf-content .pimgs img { max-width: 220px; max-height: 180px; object-fit: contain; border: 1px solid #ccc; }
+  #proto-pdf-content .pfoot { margin-top: 20px; border: 1.5px solid #000; padding: 12px; font-size: 12px; font-weight: 600; display: flex; align-items: baseline; gap: 4px; }
+  #proto-pdf-content .pfoot .sline { flex: 1; border-bottom: 1.5px solid #000; min-height: 18px; }
+
   /* ===== Mobile ===== */
   @media (max-width: 640px) {
     .pc-header { display: none; }
@@ -769,11 +800,15 @@
       </div>
       <div class="field">
         <label for="rnc-nf">NF</label>
-        <input type="text" id="rnc-nf" placeholder="Número da nota fiscal">
+        <input type="text" id="rnc-nf" placeholder="Número da nota fiscal ou -">
       </div>
       <div class="field">
         <label for="rnc-fornecedor">Fornecedor</label>
         <input type="text" id="rnc-fornecedor" placeholder="Ex.: PMG">
+      </div>
+      <div class="field">
+        <label for="rnc-sif">S.I.F</label>
+        <input type="text" id="rnc-sif" placeholder="Ex.: 0000">
       </div>
       <div class="field">
         <label for="rnc-risco">Risco ao consumidor</label>
@@ -896,49 +931,79 @@
 <!-- ABA: PROTOCOLO DE RETIRADA                    -->
 <!-- ============================================ -->
 <section class="tab-panel" id="panel-proto" role="tabpanel">
-  <div class="card" style="margin-bottom:14px;">
+  <form class="rnc-container" id="proto-form" onsubmit="return false;">
     <div class="section-title">Dados do Protocolo</div>
-    <div class="section-body proto-grid">
-      <div class="field"><label>Nº Protocolo</label><input type="text" id="proto-num" placeholder="Ex: 001"></div>
-      <div class="field"><label>Tipo</label><div class="proto-tipo-toggle"><button class="proto-tipo-btn active" onclick="proto.setTipo(0,this)">0 — Requisição</button><button class="proto-tipo-btn" onclick="proto.setTipo(1,this)">1 — Retorno</button></div></div>
-      <div class="field"><label>Destino</label><input type="text" id="proto-destino" placeholder="Destino"></div>
-      <div class="field"><label>Data</label><input type="date" id="proto-data"></div>
-      <div class="field"><label>Solicitante</label><input type="text" id="proto-solicitante" placeholder="Nome do solicitante"></div>
-      <div class="field"><label>Responsável</label><input type="text" id="proto-responsavel" placeholder="Responsável pela requisição"></div>
-      <div class="field"><label>Motorista</label><input type="text" id="proto-motorista" placeholder="Nome do motorista"></div>
-      <div class="field"><label>Veículo / Placa</label><input type="text" id="proto-veiculo" placeholder="Veiculo"></div>
+    <div class="section-body">
+      <div class="field">
+        <label for="proto-num">Nº Protocolo</label>
+        <input type="text" id="proto-num" placeholder="Ex.: 001">
+      </div>
+      <div class="field">
+        <label>Tipo</label>
+        <div class="proto-tipo-toggle">
+          <button type="button" class="proto-tipo-btn active" onclick="proto.setTipo(0,this)">0 — Requisição</button>
+          <button type="button" class="proto-tipo-btn" onclick="proto.setTipo(1,this)">1 — Retorno</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="proto-destino">Destino</label>
+        <input type="text" id="proto-destino" placeholder="Ex.: ANEXO">
+      </div>
+      <div class="field">
+        <label for="proto-data">Data</label>
+        <input type="date" id="proto-data">
+      </div>
+      <div class="field">
+        <label for="proto-solicitante">Solicitante</label>
+        <input type="text" id="proto-solicitante" placeholder="Nome do solicitante">
+      </div>
+      <div class="field">
+        <label for="proto-responsavel">Responsável pela Requisição</label>
+        <input type="text" id="proto-responsavel" placeholder="Nome do responsável">
+      </div>
+      <div class="field">
+        <label for="proto-motorista">Motorista</label>
+        <input type="text" id="proto-motorista" placeholder="Nome do motorista">
+      </div>
+      <div class="field">
+        <label for="proto-veiculo">Veículo / Placa</label>
+        <input type="text" id="proto-veiculo" placeholder="Ex.: CARRINHO ELÉTRICO">
+      </div>
     </div>
-  </div>
-  <div class="card" style="margin-bottom:14px;">
+
     <div class="section-title">Produtos</div>
     <div class="section-body full">
       <table class="proto-prod-table">
-        <thead><tr><th style="width:35%">Produto</th><th style="width:10%">Unid.</th><th style="width:12%">Solicitado</th><th style="width:12%">Indo</th><th style="width:14%">Cód.</th><th style="width:17%"></th></tr></thead>
-        <tbody id="proto-prod-body">
+        <thead>
           <tr>
-            <td><input type="text" placeholder="Descrição"></td>
-            <td><select><option>UN</option><option>KG</option><option>CX</option><option>PCT</option><option>LT</option><option>MT</option></select></td>
-            <td><input type="number" placeholder="Qtd" min="0"></td>
-            <td><input type="number" placeholder="Qtd" min="0"></td>
-            <td><input type="text" placeholder="Código"></td>
-            <td style="text-align:center"><span class="proto-btn-icon del" onclick="proto.delRow(this)">🗑</span> <span class="proto-btn-icon add" onclick="proto.addRow()">＋</span></td>
+            <th style="width:32%">Produto</th>
+            <th style="width:10%">Unid.</th>
+            <th style="width:13%">Solicitado</th>
+            <th style="width:13%">Indo</th>
+            <th style="width:14%">Cód. Prod</th>
+            <th style="width:18%"></th>
           </tr>
-        </tbody>
+        </thead>
+        <tbody id="proto-prod-body"></tbody>
       </table>
     </div>
-  </div>
-  <div class="card" style="margin-bottom:14px;">
-    <div class="section-title">Imagens (Evidências)</div>
+
+    <div class="section-title">Anexos (imagens)</div>
     <div class="section-body full">
-      <div class="proto-upload"><input type="file" accept="image/*" multiple onchange="proto.handleImgs(event)"><div style="font-size:24px;color:var(--line);">📷</div><p>Clique ou arraste imagens aqui</p></div>
-      <div class="proto-imgs" id="proto-imgs"></div>
+      <div class="image-uploads" style="grid-template-columns:1fr;">
+        <div class="image-slot">
+          <label>Fotos de evidência (até 6)</label>
+          <input type="file" id="proto-file-input" accept="image/*" multiple onchange="proto.handleImgs(event)">
+          <button type="button" class="pick-btn" onclick="document.getElementById('proto-file-input').click()">Selecionar imagens</button>
+        </div>
+      </div>
+      <div class="proto-imgs-grid" id="proto-imgs-grid"></div>
     </div>
-  </div>
-  <div class="card">
-    <div class="proto-actions">
-      <button class="proto-btn proto-btn-secondary" onclick="proto.clear()">🔄 Limpar</button>
-      <button class="proto-btn proto-btn-primary" onclick="proto.gerarPDF()">📄 Gerar PDF</button>
-    </div>
+  </form>
+
+  <div class="footer-bar">
+    <button class="btn btn-secondary" onclick="proto.clear()">Limpar</button>
+    <button class="btn btn-primary" onclick="proto.gerarPDF()">Gerar PDF</button>
   </div>
 </section>
 
@@ -1005,11 +1070,15 @@
     <tr>
       <td class="label-cell">NF:</td>
       <td><span id="p-nf"></span></td>
-      <td class="desc-area" colspan="2" rowspan="3"><span id="p-causa"></span></td>
+      <td class="desc-area" colspan="2" rowspan="4"><span id="p-causa"></span></td>
     </tr>
     <tr>
       <td class="label-cell">Fornecedor:</td>
       <td><span id="p-fornecedor"></span></td>
+    </tr>
+    <tr>
+      <td class="label-cell">S.I.F:</td>
+      <td><span id="p-sif"></span></td>
     </tr>
     <tr>
       <td class="label-cell">Risco ao consumidor:</td>
@@ -1348,7 +1417,7 @@ pc.onChange = debounce(() => {
 ==================================================== */
 const RNC_FIELDS = [
   'numeroRnc', 'setor', 'produto', 'marca', 'dataFab', 'dataVal',
-  'quantidade', 'lote', 'nf', 'fornecedor', 'risco',
+  'quantidade', 'lote', 'nf', 'fornecedor', 'sif', 'risco',
   'descricao', 'causa', 'responsavel', 'dataResp', 'prazo', 'acao'
 ];
 
@@ -1442,6 +1511,7 @@ const rnc = {
     document.getElementById('p-lote').textContent       = this.val('lote');
     document.getElementById('p-nf').textContent         = this.val('nf') || '-';
     document.getElementById('p-fornecedor').textContent = this.val('fornecedor');
+    document.getElementById('p-sif').textContent        = this.val('sif') || '-';
     document.getElementById('p-risco').textContent      = this.val('risco');
     document.getElementById('p-descricao').textContent  = this.val('descricao');
     document.getElementById('p-causa').textContent      = this.val('causa');
@@ -1610,6 +1680,11 @@ const placa = {
 
 const placaDebouncedSave = debounce(() => placa.save(), 400);
 
+// Auto uppercase para Placas Palete
+document.querySelectorAll('#placa-form input[type="text"]').forEach(inp => {
+  inp.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+});
+
 /* ====================================================
    HISTÓRICO
 ==================================================== */
@@ -1624,6 +1699,7 @@ const RNC_LABELS = {
   lote: 'Lote',
   nf: 'NF',
   fornecedor: 'Fornecedor',
+  sif: 'S.I.F',
   risco: 'Risco ao consumidor',
   descricao: 'Descrição da ocorrência',
   causa: 'Causa da não conformidade',
@@ -1853,12 +1929,178 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Restaura aba ativa
   const lastTab = loadJSON(STORE.ACTIVE_TAB, 'pc');
-  if (['pc','rnc','placa','hist'].includes(lastTab)) tabs.setActive(lastTab);
+  if (['pc','rnc','placa','proto','hist'].includes(lastTab)) tabs.setActive(lastTab);
 });
 
 /* ====================================================
    Expõe handlers no window (defesa contra escopos diferentes)
 ==================================================== */
+
+/* ====================================================
+   PROTOCOLO DE RETIRADA
+==================================================== */
+const proto = {
+  tipo: 0,
+  imgs: [],
+  trashSvg: pc.trashSvg,
+  plusSvg: pc.plusSvg,
+
+  init() {
+    this.makeRow();
+    document.getElementById('proto-data').valueAsDate = new Date();
+  },
+
+  setTipo(v, btn) {
+    this.tipo = v;
+    document.querySelectorAll('.proto-tipo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  },
+
+  makeRow() {
+    const tbody = document.getElementById('proto-prod-body');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" placeholder="Descrição do produto"></td>
+      <td><select><option>UN</option><option>KG</option><option>CX</option><option>PCT</option><option>LT</option><option>MT</option></select></td>
+      <td><input type="number" placeholder="Qtd" min="0"></td>
+      <td><input type="number" placeholder="Qtd" min="0"></td>
+      <td><input type="text" placeholder="Código"></td>
+      <td><div class="proto-prod-actions">
+        <button type="button" class="btn-icon btn-trash" title="Remover">${this.trashSvg}</button>
+        <button type="button" class="btn-icon btn-add" title="Adicionar">${this.plusSvg}</button>
+      </div></td>`;
+    tr.querySelector('.btn-trash').addEventListener('click', () => this.removeRow(tr));
+    tr.querySelector('.btn-add').addEventListener('click', () => this.makeRow());
+    tbody.appendChild(tr);
+  },
+
+  removeRow(tr) {
+    const tbody = document.getElementById('proto-prod-body');
+    if (tbody.rows.length <= 1) {
+      tr.querySelectorAll('input').forEach(i => { i.value = ''; });
+    } else {
+      tr.remove();
+    }
+  },
+
+  handleImgs(e) {
+    for (const f of e.target.files) {
+      if (this.imgs.length >= 6) { toast('Máximo 6 imagens', 'erro'); break; }
+      const r = new FileReader();
+      r.onload = ev => { this.imgs.push(ev.target.result); this.renderImgs(); };
+      r.readAsDataURL(f);
+    }
+    e.target.value = '';
+  },
+
+  renderImgs() {
+    const g = document.getElementById('proto-imgs-grid');
+    g.innerHTML = '';
+    this.imgs.forEach((src, i) => {
+      const d = document.createElement('div');
+      d.className = 'proto-thumb';
+      d.innerHTML = '<img src="' + src + '"><button class="rm" onclick="proto.rmImg(' + i + ')">\u2715</button>';
+      g.appendChild(d);
+    });
+  },
+
+  rmImg(i) { this.imgs.splice(i, 1); this.renderImgs(); },
+
+  getData() {
+    const rows = document.querySelectorAll('#proto-prod-body tr');
+    const prods = [];
+    rows.forEach(row => {
+      const inp = row.querySelectorAll('input');
+      const sel = row.querySelector('select');
+      prods.push({ desc: inp[0] ? inp[0].value : '', unid: sel ? sel.value : 'UN', sol: inp[1] ? inp[1].value : '', indo: inp[2] ? inp[2].value : '', cod: inp[3] ? inp[3].value : '' });
+    });
+    const dt = document.getElementById('proto-data').value;
+    let dtf = '';
+    if (dt) { const p = dt.split('-'); dtf = p[2] + '/' + p[1] + '/' + p[0]; }
+    return {
+      num: document.getElementById('proto-num').value,
+      destino: document.getElementById('proto-destino').value,
+      solicitante: document.getElementById('proto-solicitante').value,
+      responsavel: document.getElementById('proto-responsavel').value,
+      motorista: document.getElementById('proto-motorista').value,
+      veiculo: document.getElementById('proto-veiculo').value,
+      data: dtf, tipo: this.tipo, prods: prods, imgs: this.imgs
+    };
+  },
+
+  clear() {
+    if (!confirm('Limpar formulário do protocolo?')) return;
+    ['proto-num','proto-destino','proto-solicitante','proto-responsavel','proto-motorista','proto-veiculo'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('proto-data').valueAsDate = new Date();
+    this.tipo = 0;
+    document.querySelectorAll('.proto-tipo-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+    document.getElementById('proto-prod-body').innerHTML = '';
+    this.makeRow();
+    this.imgs = [];
+    this.renderImgs();
+    toast('Formulário limpo');
+  },
+
+  async gerarPDF() {
+    const d = this.getData();
+    if (!d.num) { toast('Preencha o Nº do Protocolo', 'erro'); return; }
+    if (!d.solicitante) { toast('Preencha o Solicitante', 'erro'); return; }
+
+    let pRows = '';
+    const allRows = document.querySelectorAll('#proto-prod-body tr');
+    allRows.forEach(row => {
+      const inp = row.querySelectorAll('input');
+      const sel = row.querySelector('select');
+      pRows += '<tr><td>' + (inp[0]?inp[0].value:'') + '</td><td style="text-align:center">' + (sel?sel.value:'UN') + '</td><td style="text-align:center">' + (inp[1]?inp[1].value:'') + '</td><td style="text-align:center">' + (inp[2]?inp[2].value:'') + '</td><td style="text-align:center">' + (inp[3]?(inp[3].value||'-'):'-') + '</td></tr>';
+    });
+    for (let i = allRows.length; i < 3; i++) pRows += '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>';
+
+    let imgsH = d.imgs.length > 0
+      ? d.imgs.map(function(s){ return '<img src="'+s+'" style="max-width:220px;max-height:180px;object-fit:contain;border:1px solid #ccc;">'; }).join('')
+      : '<div style="width:100%;text-align:center;color:#999;font-size:13px;padding:60px 0;">ESPAÇO PARA INSERIR IMAGEM</div>';
+
+    const c = document.getElementById('proto-pdf-content');
+    c.innerHTML = '<div class="ppg"><div class="phdr"><div class="phdr-l"><table>'
+      +'<tr><td class="fl">Nº PROTOCOLO</td><td class="fv">'+d.num+'</td></tr>'
+      +'<tr><td class="fl">DESTINO:</td><td class="fv">'+d.destino+'</td></tr>'
+      +'<tr><td class="fl">SOLICITANTE:</td><td class="fv">'+d.solicitante+'</td></tr>'
+      +'<tr><td class="fl">DATA:</td><td class="fv">'+d.data+'</td></tr>'
+      +'<tr><td class="fl">MOTORISTA</td><td class="fv">'+d.motorista+'</td></tr>'
+      +'<tr><td class="fl">VEICULO/PLACA</td><td class="fv">'+d.veiculo+'</td></tr>'
+      +'</table></div>'
+      +'<div class="phdr-r"><img src="'+LOGO_SRC+'">'
+      +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">DOCUMENTAÇÃO DE REQUISIÇÃO/RETORNO</div>'
+      +'<div style="font-size:11px;">0 - REQUISIÇÃO</div><div style="font-size:11px;">1 - RETORNO</div>'
+      +'<div style="font-size:22px;font-weight:700;">'+d.tipo+'</div>'
+      +'<div style="font-size:10px;font-weight:600;text-transform:uppercase;margin-top:6px;padding-top:6px;border-top:1px solid #ccc;">RESPONSAVEL PELA REQUISIÇÃO:<br>'+d.responsavel+'</div>'
+      +'</div></div>'
+      +'<table class="ptbl"><thead><tr><th style="width:40%">DESCRIÇÃO DO PRODUTO</th><th style="width:12%">UNID</th><th style="width:14%">SOLICITADO</th><th style="width:14%">INDO</th><th style="width:20%">COD. PROD</th></tr></thead><tbody>'+pRows+'</tbody></table>'
+      +'<div class="pimgs">'+imgsH+'</div>'
+      +'<div class="pfoot"><span style="white-space:nowrap;">NOME / CPF:</span><span class="sline"></span></div></div>';
+
+    c.style.left = '0'; c.style.position = 'fixed'; c.style.top = '0'; c.style.zIndex = '-1';
+    await new Promise(function(r){ setTimeout(r, 400); });
+
+    try {
+      const canvas = await html2canvas(c, {scale:2, useCORS:true, allowTaint:true, backgroundColor:'#ffffff', width:794});
+      const pdf = new window.jspdf.jsPDF('p','mm','a4');
+      const pw=210, ph=297;
+      const imgData = canvas.toDataURL('image/jpeg',0.95);
+      const iw=pw, ih=(canvas.height*iw)/canvas.width;
+      if(ih<=ph){pdf.addImage(imgData,'JPEG',0,0,iw,ih);}
+      else{let hl=ih,pos=0;pdf.addImage(imgData,'JPEG',0,pos,iw,ih);hl-=ph;while(hl>0){pos-=ph;pdf.addPage();pdf.addImage(imgData,'JPEG',0,pos,iw,ih);hl-=ph;}}
+      pdf.save('protocolo_'+(d.num||'sem_numero')+'_'+(d.data||'sem_data').replace(/\//g,'-')+'.pdf');
+      toast('PDF gerado com sucesso!');
+      historico.add({tipo:'proto', resumo:'Protocolo #'+d.num+' — '+d.solicitante, data:nowStamp()});
+    } catch(err) { console.error(err); toast('Erro ao gerar PDF','erro'); }
+
+    c.style.left = '-9999px'; c.style.position = 'absolute'; c.style.zIndex = '';
+  }
+};
+
+proto.init();
+
+window.proto = proto;
 window.pc = pc;
 window.rnc = rnc;
 window.placa = placa;
