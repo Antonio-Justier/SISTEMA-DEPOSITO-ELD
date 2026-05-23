@@ -704,6 +704,37 @@
     .tab-btn { font-size: 12px; padding: 13px 6px; min-width: 0; }
     .footer-bar { flex-direction: column; align-items: stretch; }
     .footer-bar .btn { width: 100%; }
+
+    /* Proto mobile: tabela vira cards empilhados */
+    .proto-prod-table thead { display: none; }
+    .proto-prod-table,
+    .proto-prod-table tbody,
+    .proto-prod-table tr,
+    .proto-prod-table td { display: block; width: 100%; }
+    .proto-prod-table tr {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+    }
+    .proto-prod-table td {
+      padding: 4px 0;
+      border: none;
+    }
+    .proto-prod-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--ink-soft);
+      margin-bottom: 3px;
+    }
+    .proto-prod-table td:last-child::before { display: none; }
+    .proto-prod-table td:last-child { padding-top: 8px; }
+    .proto-prod-actions { justify-content: flex-start; }
   }
 </style>
 </head>
@@ -1960,11 +1991,11 @@ const proto = {
     const tbody = document.getElementById('proto-prod-body');
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="text" placeholder="Descrição do produto"></td>
-      <td><select><option>UN</option><option>KG</option><option>CX</option><option>PCT</option><option>LT</option><option>MT</option></select></td>
-      <td><input type="number" placeholder="Qtd" min="0"></td>
-      <td><input type="number" placeholder="Qtd" min="0"></td>
-      <td><input type="text" placeholder="Código"></td>
+      <td data-label="Produto"><input type="text" placeholder="Descrição do produto"></td>
+      <td data-label="Unid."><select><option>UN</option><option>KG</option><option>CX</option><option>PCT</option><option>LT</option><option>MT</option></select></td>
+      <td data-label="Solicitado"><input type="number" placeholder="Qtd" min="0"></td>
+      <td data-label="Indo"><input type="number" placeholder="Qtd" min="0"></td>
+      <td data-label="Cód. Prod"><input type="text" placeholder="Código"></td>
       <td><div class="proto-prod-actions">
         <button type="button" class="btn-icon btn-trash" title="Remover">${this.trashSvg}</button>
         <button type="button" class="btn-icon btn-add" title="Adicionar">${this.plusSvg}</button>
