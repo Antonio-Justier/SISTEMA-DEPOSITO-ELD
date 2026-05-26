@@ -680,7 +680,7 @@
   #proto-pdf-content .ptbl { width: 100%; border-collapse: collapse; margin-top: 12px; }
   #proto-pdf-content .ptbl th { background: #898989; color: #fff; border: 1.5px solid #000; padding: 6px 8px; font-size: 10px; text-transform: uppercase; font-weight: 700; }
   #proto-pdf-content .ptbl td { border: 1.5px solid #000; padding: 5px 8px; font-size: 11px; }
-  #proto-pdf-content .pimgs { border: 2px solid #0056b3; margin-top: 16px; padding: 12px; min-height: 180px; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+  #proto-pdf-content .pimgs { margin-top: 16px; padding: 12px; min-height: 180px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
   #proto-pdf-content .pimgs img { max-width: 220px; max-height: 180px; object-fit: contain; border: 1px solid #ccc; }
   #proto-pdf-content .pfoot { margin-top: 20px; border: 1.5px solid #000; padding: 12px; font-size: 12px; font-weight: 600; display: flex; align-items: baseline; gap: 4px; }
   #proto-pdf-content .pfoot .sline { flex: 1; border-bottom: 1.5px solid #000; min-height: 18px; }
@@ -1826,11 +1826,40 @@ const historico = {
       placa.save();
       tabs.setActive('placa');
       toast('Dados carregados na Placa');
+    } else if (entry.type === 'proto') {
+      if (!confirm('Carregar estes dados no Protocolo? O conteúdo atual será substituído.')) return;
+      const d = entry.items || {};
+      ['num','destino','solicitante','responsavel','motorista','veiculo'].forEach(f => {
+        const el = document.getElementById('proto-' + f);
+        if (el && d[f] !== undefined) el.value = d[f];
+      });
+      if (d.data) {
+        const p = d.data.split('/');
+        if (p.length === 3) document.getElementById('proto-data').value = p[2]+'-'+p[1]+'-'+p[0];
+      }
+      proto.tipo = d.tipo || 0;
+      document.querySelectorAll('.proto-tipo-btn').forEach((b,i) => b.classList.toggle('active', i === proto.tipo));
+      document.getElementById('proto-prod-body').innerHTML = '';
+      if (d.prods && d.prods.length) {
+        d.prods.forEach(p => {
+          proto.makeRow();
+          const tr = document.getElementById('proto-prod-body').lastElementChild;
+          const inp = tr.querySelectorAll('input');
+          const sel = tr.querySelector('select');
+          if (inp[0]) inp[0].value = p.desc || '';
+          if (sel) sel.value = p.unid || 'UN';
+          if (inp[1]) inp[1].value = p.sol || '';
+          if (inp[2]) inp[2].value = p.indo || '';
+          if (inp[3]) inp[3].value = p.cod || '';
+        });
+      } else { proto.makeRow(); }
+      tabs.setActive('proto');
+      toast('Dados carregados no Protocolo');
     }
   },
 
   renderEntry(entry) {
-    const tag = entry.type === 'pc' ? 'PC' : (entry.type === 'placa' ? 'PLACA' : 'RNC');
+    const tag = entry.type === 'pc' ? 'PC' : (entry.type === 'placa' ? 'PLACA' : (entry.type === 'proto' ? 'PROTO' : 'RNC'));
     const tagClass = entry.type;
     let body = '';
 
@@ -1847,6 +1876,20 @@ const historico = {
           `).join('')}
         </table>
       `;
+    } else if (entry.type === 'proto') {
+      const d = entry.items || {};
+      const PROTO_SHOW = {num:'Nº Protocolo',destino:'Destino',solicitante:'Solicitante',responsavel:'Responsável',motorista:'Motorista',veiculo:'Veículo/Placa',data:'Data',tipo:'Tipo'};
+      body = '<table>';
+      Object.keys(PROTO_SHOW).forEach(k => {
+        let v = d[k] != null ? String(d[k]) : '';
+        if (k === 'tipo') v = v === '0' || v === 0 ? '0 — Requisição' : '1 — Retorno';
+        body += '<tr><td>' + PROTO_SHOW[k] + '</td><td>' + (v ? escapeHtml(v) : '<span class="empty">—</span>') + '</td></tr>';
+      });
+      if (d.prods && d.prods.length) {
+        body += '<tr><td colspan="2" style="font-weight:700;padding-top:8px;">Produtos:</td></tr>';
+        d.prods.forEach(p => { body += '<tr><td>' + escapeHtml(p.desc||'') + '</td><td>' + (p.sol||'') + ' ' + (p.unid||'UN') + '</td></tr>'; });
+      }
+      body += '</table>';
     } else if (entry.type === 'placa') {
       body = '<table>';
       PLACA_FIELDS.forEach(f => {
@@ -2078,13 +2121,10 @@ const proto = {
     if (!d.solicitante) { toast('Preencha o Solicitante', 'erro'); return; }
 
     let pRows = '';
-    const allRows = document.querySelectorAll('#proto-prod-body tr');
-    allRows.forEach(row => {
-      const inp = row.querySelectorAll('input');
-      const sel = row.querySelector('select');
-      pRows += '<tr><td>' + (inp[0]?inp[0].value:'') + '</td><td style="text-align:center">' + (sel?sel.value:'UN') + '</td><td style="text-align:center">' + (inp[1]?inp[1].value:'') + '</td><td style="text-align:center">' + (inp[2]?inp[2].value:'') + '</td><td style="text-align:center">' + (inp[3]?(inp[3].value||'-'):'-') + '</td></tr>';
+    d.prods.forEach(p => {
+      pRows += '<tr><td>' + (p.desc||'') + '</td><td style="text-align:center">' + (p.unid||'UN') + '</td><td style="text-align:center">' + (p.sol||'') + '</td><td style="text-align:center">' + (p.indo||'') + '</td><td style="text-align:center">' + (p.cod||'-') + '</td></tr>';
     });
-    for (let i = allRows.length; i < 3; i++) pRows += '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>';
+    for (let i = d.prods.length; i < 3; i++) pRows += '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>';
 
     let imgsH = d.imgs.length > 0
       ? d.imgs.map(function(s){ return '<img src="'+s+'" style="max-width:220px;max-height:180px;object-fit:contain;border:1px solid #ccc;">'; }).join('')
@@ -2122,7 +2162,8 @@ const proto = {
       else{let hl=ih,pos=0;pdf.addImage(imgData,'JPEG',0,pos,iw,ih);hl-=ph;while(hl>0){pos-=ph;pdf.addPage();pdf.addImage(imgData,'JPEG',0,pos,iw,ih);hl-=ph;}}
       pdf.save('protocolo_'+(d.num||'sem_numero')+'_'+(d.data||'sem_data').replace(/\//g,'-')+'.pdf');
       toast('PDF gerado com sucesso!');
-      historico.add({tipo:'proto', resumo:'Protocolo #'+d.num+' — '+d.solicitante, data:nowStamp()});
+      const histData = Object.assign({}, d); delete histData.imgs;
+      historico.add({type:'proto', title:'Protocolo #'+d.num+' — '+d.solicitante, items: histData});
     } catch(err) { console.error(err); toast('Erro ao gerar PDF','erro'); }
 
     c.style.left = '-9999px'; c.style.position = 'absolute'; c.style.zIndex = '';
